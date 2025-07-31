@@ -1,7 +1,10 @@
 from linear_regression import simple_lr
 from logistic_regression import lr
 from distance_based import knn, k_means
+from SVM import svm
 import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import make_blobs
 
 
 def run_linear_regression():
@@ -38,6 +41,24 @@ def run_kmeans():
     k = 3
     k_means.kmeans(X,k)
 
+def run_svm1():
+    model = svm.PrimalSVM(0.001,10,1000)
+    X, y = make_blobs(n_samples = 100, centers = 2, random_state=42)
+    y = 2*y - 1 
+    model.fit(X,y)
+    print(f"Training accurcy for svm1: {model.score(X,y)}")
 
+    def plot_boundary(model, X, y):
+        plt.scatter(X[:,0], X[:,1], c=y, cmap='bwr', s=30)
+        ax = plt.gca()
+        xlim = ax.get_xlim()
+        ylim = ax.get_ylim()
 
+        xx, yy = np.meshgrid(np.linspace(*xlim,100), np.linspace(*ylim,100))
+        grid = np.c_[xx.ravel(),yy.ravel()]
+        z = model.predict(grid).reshape(xx.shape)
 
+        plt.contourf(xx, yy, z, cmap='bwr', alpha = 0.2)
+        plt.title("SVM decision boundary (Primal)")
+        plt.show()
+    plot_boundary(model, X, y)
