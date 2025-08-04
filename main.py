@@ -1,7 +1,7 @@
 from run import run
 
 def main():
-    run.run_svm1()
+    run.run_perceptron()
 
 if __name__ == "__main__":
     main()

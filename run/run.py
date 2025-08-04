@@ -5,6 +5,7 @@ from SVM import svm
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.datasets import make_blobs
+from perceptron import pp
 
 
 def run_linear_regression():
@@ -62,3 +63,15 @@ def run_svm1():
         plt.title("SVM decision boundary (Primal)")
         plt.show()
     plot_boundary(model, X, y)
+
+def run_perceptron():
+    model = pp.Perceptron([2,4,4,1])
+
+    X = np.array([[0,0,1,1],
+                  [0,1,0,1]])
+    y = np.array([[0,1,1,0]])
+
+    model.train(X,y, epochs=3000, lr = 1)
+    pred = model.predict(X)
+    print("Preditcions using preceptron",pred.astype(int))
+

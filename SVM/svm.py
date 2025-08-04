@@ -33,9 +33,12 @@ class PrimalSVM:
     
     def score(self, X, y):
         return np.mean(self.predict(X) == y)
-    
+
+def polynomial(X):
+    return X @ X.T # n x n
+
 class SVM:
-    def __init__(self, lr=0.0001, C=1.0, epochs=1000):
+    def __init__(self, lr=0.0001, C=1.0, epochs=1000,*args):
         self.lr = lr
         self.C = C
         self.epochs = epochs
