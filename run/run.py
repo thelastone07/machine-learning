@@ -6,6 +6,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.datasets import make_blobs
 from perceptron import pp
+from dl.dense.dense import Dense
+from dl.activation.activation import ReLU
+from dl.loss.loss import CrossEntropyLoss
+from dl.optimizers.SGD import SGD
 
 
 def run_linear_regression():
@@ -74,4 +78,56 @@ def run_perceptron():
     model.train(X,y, epochs=3000, lr = 1)
     pred = model.predict(X)
     print("Preditcions using preceptron",pred.astype(int))
+
+def run_dl():
+    np.random.seed(0)
+
+    # Dummy data: 5 samples, 4 features, 3 classes
+    x = np.random.randn(5, 4)
+    y_true = np.array([0, 2, 1, 2, 0])  # class labels
+
+    # Create model: Dense1 -> ReLU -> Dense2
+    dense1 = Dense(input_dim=4, output_dim=10)
+    relu = ReLU()
+    dense2 = Dense(input_dim=10, output_dim=3)
+
+    # Loss function
+    loss_fn = CrossEntropyLoss()
+
+    # Optimizer
+    params = dense1.get_params_and_grads() + dense2.get_params_and_grads()
+    optimizer = SGD(parameters=params, lr=0.1)
+
+    # Training loop
+    epochs = 100
+    for epoch in range(1, epochs + 1):
+        # === Forward ===
+        out1 = dense1.forward(x)
+        out2 = relu.forward(out1)
+        logits = dense2.forward(out2)
+        loss = loss_fn.forward(logits, y_true)
+
+        # === Backward ===
+        dlogits = loss_fn.backward()
+        dout2 = dense2.backward(dlogits)
+        dout1 = relu.backward(dout2)
+        _ = dense1.backward(dout1)
+
+        # === Optimizer step ===
+        optimizer.step()
+
+        if epoch % 10 == 0 or epoch == 1:
+            print(f"Epoch {epoch:3d} | Loss: {loss:.4f}")
+
+    # === Predict on training data ===
+    out1 = dense1.forward(x)
+    out2 = relu.forward(out1)
+    logits = dense2.forward(out2)
+    preds = np.argmax(logits, axis=1)
+
+    # === Accuracy ===
+    accuracy = np.mean(preds == y_true)
+    print("\nPredictions:", preds)
+    print("Ground Truth:", y_true)
+    print(f"Accuracy: {accuracy * 100:.2f}%")
 
