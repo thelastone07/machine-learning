@@ -127,7 +127,7 @@ def run_dl():
 
     # === Accuracy ===
     accuracy = np.mean(preds == y_true)
-    print("\nPredictions:", preds)
+    print("\nPredictions for dl:", preds)
     print("Ground Truth:", y_true)
     print(f"Accuracy: {accuracy * 100:.2f}%")
 
