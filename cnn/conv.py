@@ -45,7 +45,7 @@ class Conv2D:
 
         self.X_patches = X_patches[:,:, ::self.stride, ::self.stride, : , : ] #(N, C_int, H_out, W_out, KH, KW)
 
-        out = np.einsum("nchwkl,ockl->nohw",self.X_patches,self.W)
+        out = np.einsum("nchwkl,ockl->nohw",self.X_patches,self.W) # (N, C_out, H_out, W_out)
         out += self.b[None,:,None,None]
         return out 
 
