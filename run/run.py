@@ -7,9 +7,13 @@ import matplotlib.pyplot as plt
 from sklearn.datasets import make_blobs
 from perceptron import pp
 from dl.dense.dense import Dense
-from dl.activation.activation import ReLU
-from dl.loss.loss import CrossEntropyLoss
+from dl.activation.activation import ReLU, Sigmoid
+from dl.loss.loss import CrossEntropyLoss, MSELoss
 from dl.optimizers.SGD import SGD
+from cnn.conv import Conv2D
+from cnn.pool import MaxPool
+from cnn.fcn import FC
+ 
 
 
 def run_linear_regression():
@@ -87,9 +91,9 @@ def run_dl():
     y_true = np.array([0, 2, 1, 2, 0])  # class labels
 
     # Create model: Dense1 -> ReLU -> Dense2
-    dense1 = Dense(input_dim=4, output_dim=10)
+    dense1 = Dense(4, 10)
     relu = ReLU()
-    dense2 = Dense(input_dim=10, output_dim=3)
+    dense2 = Dense(10, 3)
 
     # Loss function
     loss_fn = CrossEntropyLoss()
@@ -131,3 +135,71 @@ def run_dl():
     print("Ground Truth:", y_true)
     print(f"Accuracy: {accuracy * 100:.2f}%")
 
+def run_cnn():
+    X = np.random.randn(4, 3, 32, 32)
+    y_true = np.random.randn(4, 10)
+
+    # Layers
+    conv = Conv2D(c=3, h=32, w=32, kernels=8, size=(3, 3), stride=1, n=4)
+    pool = MaxPool()
+    flatten = FC()
+    dense1 = Dense(8 * 15 * 15, 64)
+    activation1 = Sigmoid()
+    dense2 = Dense(64, 10)
+    loss_fn = MSELoss()
+
+    # Optimizer using get_params_and_grads
+    params = (
+        conv.get_params_and_grads() +
+        dense1.get_params_and_grads() +
+        dense2.get_params_and_grads()
+    )
+    optimizer = SGD(params, lr=0.01)
+
+    # Training Step
+    for epoch in range(50):
+        # Forward pass
+        out = conv.forward(X)  
+        out = pool.forward(out, kh=2, kw=2, stride=2) 
+        out = flatten.forward(out)           
+        out = dense1.forward(out) 
+        out = activation1.forward(out)       
+        out = dense2.forward(out)        
+        loss = loss_fn.forward(out, y_true)
+
+
+        print(f"Epoch {epoch+1}: Loss = {loss:.4f}")
+
+        # Backward pass
+        dout = loss_fn.backward()
+        dout = dense2.backward(dout)
+        dout = activation1.backward(dout)
+        dout = dense1.backward(dout)
+        dout = flatten.backward(dout)
+        dout = pool.backward(dout)
+        dout = conv.backward(dout)
+
+        # Update weights
+        optimizer.step()
+
+    # Prediction after training
+    out = conv.forward(X)
+    out = pool.forward(out, kh=2, kw=2, stride=2)
+    out = flatten.forward(out)
+    out = dense1.forward(out)
+    out = activation1.forward(out)
+    out = dense2.forward(out)
+
+    # Print prediction
+    print("Predictions (logits):")
+    print(out)
+
+    # If classification, print class predictions
+    predicted_classes = np.argmax(out, axis=1)
+    print("Predicted classes:")
+    print(predicted_classes)
+
+
+
+
+    
