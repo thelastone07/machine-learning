@@ -13,6 +13,7 @@ from dl.optimizers.SGD import SGD
 from cnn.conv import Conv2D
 from cnn.pool import MaxPool
 from cnn.fcn import FC
+from rnn.VanillaRNN import VanillaRNN
  
 
 
@@ -198,6 +199,23 @@ def run_cnn():
     predicted_classes = np.argmax(out, axis=1)
     print("Predicted classes:")
     print(predicted_classes)
+
+
+def run_vrnn():
+    T, B, I, H, O = 5, 3, 4, 6, 2 
+
+    rnn = VanillaRNN(T,B, I, H, O, 0.1)
+
+    X = np.random.randn(T,B,I)
+    targets = np.random.randn(T,B,O)
+
+    for epoch in range(500):
+        Y, cache = rnn.forward(X)
+        loss, dy = rnn.compute_loss(Y, targets)
+        rnn.backward(cache, dy)
+        rnn.step() 
+        if epoch % 10 == 0:
+            print(f"epoch : {epoch}, Loss: {loss:.4f}")
 
 
 
